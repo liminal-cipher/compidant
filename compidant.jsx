@@ -275,8 +275,12 @@ const COMPETITIONS = [
 ];
 
 const PURPOSES = [
-  { key: "money", emoji: "💰", label: "돈 벌기", desc: "상금이 곧 정의" },
-  { key: "award", emoji: "🏆", label: "수상 경력", desc: "이력서에 한 줄" },
+  {
+    key: "learning",
+    emoji: "📚",
+    label: "학습/성장",
+    desc: "실력을 키우고 싶어",
+  },
   {
     key: "portfolio",
     emoji: "📁",
@@ -284,10 +288,16 @@ const PURPOSES = [
     desc: "보여줄 게 필요해",
   },
   {
-    key: "learning",
-    emoji: "📚",
-    label: "학습/성장",
-    desc: "실력을 키우고 싶어",
+    key: "award",
+    emoji: "🏆",
+    label: "수상 경력",
+    desc: "이력서에 한 줄",
+  },
+  {
+    key: "money",
+    emoji: "💰",
+    label: "돈 벌기",
+    desc: "상금이 곧 정의",
   },
   {
     key: "startup",
@@ -551,7 +561,7 @@ function Opt({ item, selected, onClick }) {
   );
 }
 
-export default function CompFinder() {
+export default function Compidant() {
   const [step, setStep] = useState(0);
   const [purpose, setPurpose] = useState(null);
   const [buildMethod, setBuildMethod] = useState(null);
@@ -591,8 +601,6 @@ export default function CompFinder() {
   };
 
   const fetchAi = async (top) => {
-    // Claude API integration will be added in next iteration
-    return;
     if (top.length === 0) return;
     setAiLoading(true);
     try {
@@ -655,7 +663,7 @@ export default function CompFinder() {
       />
       <div style={S.container}>
         <div style={S.header}>
-          <h1 style={S.title}>🎯 CompFinder</h1>
+          <h1 style={S.title}>🎯 Compidant</h1>
           <p style={S.subtitle}>AI 대회 · 공모전 맞춤 추천</p>
           <p style={S.updated}>데이터 최종 업데이트: 2026.04.06</p>
         </div>
