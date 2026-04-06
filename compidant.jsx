@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // ─── VERIFIED COMPETITION DATA (as of 2026.04.06) ──────────────────────────
 const COMPETITIONS = [
@@ -11,7 +11,8 @@ const COMPETITIONS = [
     deadline: "2026-04-24",
     categories: ["money", "award", "portfolio"],
     skills: ["python", "ai_ml"],
-    description: "AI 전 분야 최고 수준 연구팀 간 경쟁. 1위 5억원",
+    description:
+      "AI 전 분야 최고 수준 연구팀 간 경쟁. 1위 5억원. 전국민 AI 경진대회 핵심 트랙",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: false,
@@ -21,16 +22,17 @@ const COMPETITIONS = [
   },
   {
     id: 2,
-    name: "AI 루키 대회",
+    name: "AI 루키 대회 (인공지능 루키)",
     host: "과기정통부·NIPA",
     prize: "3.5억원",
     prizeNum: 350000000,
     deadline: "2026-05-08",
     categories: ["money", "award", "learning", "portfolio"],
     skills: ["python", "ai_ml", "web"],
-    description: "전공무관 대학생(만34세 이하) 대상. 1위 5000만원",
+    description:
+      "전공무관 대학생(만34세 이하 학사미소지) 대상. 일반트랙 + 국내AI트랙. 1위 5000만원",
     team: "both",
-    teamDesc: "개인/팀",
+    teamDesc: "개인/팀(중복3개팀까지)",
     vibeOk: true,
     nocode: false,
     timeCommit: "medium",
@@ -38,14 +40,15 @@ const COMPETITIONS = [
   },
   {
     id: 3,
-    name: "전국민 AI - AI 퀴즈",
+    name: "전국민 AI 경진대회 - AI 퀴즈",
     host: "과기정통부",
     prize: "총 30억원(전체)",
     prizeNum: 3000000000,
     deadline: "2026-11-30",
     categories: ["learning", "award"],
     skills: [],
-    description: "코딩 없이 AI 지식 퀴즈로 참여. 누구나 가능",
+    description:
+      "코딩 없이 AI 지식 퀴즈로 참여. 초등학생~어르신 누구나. 누적 점수로 시상",
     team: "solo",
     teamDesc: "개인",
     vibeOk: false,
@@ -55,14 +58,15 @@ const COMPETITIONS = [
   },
   {
     id: 4,
-    name: "전국민 AI - AI 창작대회",
+    name: "전국민 AI 경진대회 - AI 창작대회",
     host: "과기정통부",
     prize: "총 30억원(전체)",
     prizeNum: 3000000000,
     deadline: "2026-11-30",
     categories: ["portfolio", "award", "learning"],
     skills: ["ai_ml", "video", "design"],
-    description: "생성형 AI를 활용한 창작 콘텐츠 제작",
+    description:
+      "미드저니 등 생성형 AI를 활용한 창작 콘텐츠 제작. 초중고~일반인",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -72,14 +76,15 @@ const COMPETITIONS = [
   },
   {
     id: 5,
-    name: "전국민 AI - 활용 사례 공모전",
+    name: "전국민 AI 경진대회 - AI 활용 사례 공모전",
     host: "과기정통부",
     prize: "총 30억원(전체)",
     prizeNum: 3000000000,
     deadline: "2026-11-30",
     categories: ["portfolio", "award", "startup"],
     skills: ["ai_ml", "web", "data", "plan"],
-    description: "일상/업무에서 AI를 활용한 혁신 사례 공모",
+    description:
+      "일상/업무에서 AI를 활용한 혁신 사례 공모. 국내 AI 서비스 활용 권장",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -89,16 +94,17 @@ const COMPETITIONS = [
   },
   {
     id: 6,
-    name: "AI Co-Scientist Challenge",
+    name: "AI Co-Scientist Challenge Korea",
     host: "과기정통부·한국연구재단",
-    prize: "최대 25억원 사업화지원",
+    prize: "대상 최대 25억원 사업화지원",
     prizeNum: 2500000000,
     deadline: "2026-04-03",
     categories: ["award", "portfolio", "money"],
     skills: ["python", "ai_ml"],
-    description: "AI활용 연구보고서 + AI Agent 개발",
+    description:
+      "Track1: AI활용 연구보고서 작성, Track2: 과학기술 AI Agent 개발. AI Factory에서 진행",
     team: "both",
-    teamDesc: "개인/팀",
+    teamDesc: "개인/팀(인원제한없음)",
     vibeOk: false,
     nocode: false,
     timeCommit: "high",
@@ -106,14 +112,15 @@ const COMPETITIONS = [
   },
   {
     id: 7,
-    name: "서울시 빅데이터 경진대회",
+    name: "서울시 빅데이터 활용 경진대회",
     host: "서울특별시",
     prize: "2350만원",
     prizeNum: 23500000,
     deadline: "2026-05-13",
     categories: ["portfolio", "award", "startup"],
     skills: ["python", "data", "ai_ml", "web"],
-    description: "서울 공공데이터+AI기술 필수. 3개 부문",
+    description:
+      "서울 공공데이터+AI기술 필수 활용. 시각화/분석/창업 3개 부문. 빅데이터캠퍼스 방문 필수",
     team: "both",
     teamDesc: "개인/팀(5명이내)",
     vibeOk: false,
@@ -124,13 +131,14 @@ const COMPETITIONS = [
   {
     id: 8,
     name: "AI·SW중심대학 디지털 경진대회",
-    host: "IITP",
-    prize: "미정",
+    host: "정보통신기획평가원(IITP)",
+    prize: "미정(후원기업상 포함)",
     prizeNum: 10000000,
     deadline: "2026-08-11",
     categories: ["award", "learning", "portfolio"],
     skills: ["python", "ai_ml", "web"],
-    description: "AI Agent 기반 SW개발 + 의사결정 예측 챌린지",
+    description:
+      "SW부문: AI Agent 기반 SW개발, AI부문: AI Agent 의사결정 예측 챌린지. 예선 온라인/본선 대한상의",
     team: "team",
     teamDesc: "팀",
     vibeOk: false,
@@ -140,14 +148,15 @@ const COMPETITIONS = [
   },
   {
     id: 9,
-    name: "국토·교통 데이터 경진대회",
+    name: "국토·교통 데이터 활용 경진대회",
     host: "국토교통부",
-    prize: "창업연계지원",
+    prize: "미정(창업연계지원)",
     prizeNum: 5000000,
     deadline: "2026-06-30",
     categories: ["startup", "portfolio", "award"],
     skills: ["data", "ai_ml", "web", "plan"],
-    description: "국토교통 데이터+AI. 10팀 선발 후 창업연계",
+    description:
+      "국토교통 데이터+AI 활용. 아이디어 부문 + 제품·서비스 개발 부문. 10팀 선발 후 창업연계",
     team: "both",
     teamDesc: "개인/팀(3인이하)",
     vibeOk: true,
@@ -157,14 +166,15 @@ const COMPETITIONS = [
   },
   {
     id: 10,
-    name: "전국민 AI - 국민행복 AI 경진대회",
+    name: "전국민 AI 경진대회 - 국민행복 AI 경진대회",
     host: "과기정통부",
     prize: "총 30억원(전체)",
     prizeNum: 3000000000,
     deadline: "2026-11-30",
     categories: ["learning", "award"],
     skills: ["plan"],
-    description: "디지털 취약계층 대상 기초 AI 활용 대회",
+    description:
+      "디지털 취약계층(어르신·장애인 등) 대상 기초 AI 활용 능력 대회",
     team: "solo",
     teamDesc: "개인",
     vibeOk: false,
@@ -181,7 +191,8 @@ const COMPETITIONS = [
     deadline: "2026-05-31",
     categories: ["startup", "money"],
     skills: ["ai_ml", "web", "plan", "data"],
-    description: "전국민 창업 오디션. 5000명 선발, 200만원~10억원",
+    description:
+      "전국민 창업 오디션. 5000명 선발, 활동자금 200만원~최종 10억원. 기술트랙+로컬트랙",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -191,14 +202,15 @@ const COMPETITIONS = [
   },
   {
     id: 12,
-    name: "KBI 금융 AI 콘텐츠 공모전",
+    name: "KBI 금융 AI 리터러시 콘텐츠 공모전",
     host: "한국금융연수원",
     prize: "대상 100만원",
     prizeNum: 1000000,
     deadline: "2026-04-13",
     categories: ["portfolio", "learning"],
     skills: ["ai_ml", "video", "design"],
-    description: "생성형 AI로 금융 홍보 콘텐츠 제작",
+    description:
+      "생성형 AI로 금융 홍보 콘텐츠(카드뉴스/영상) 제작. ChatGPT, 미드저니 등 활용",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -208,14 +220,15 @@ const COMPETITIONS = [
   },
   {
     id: 13,
-    name: "빅콘테스트",
-    host: "NIA",
-    prize: "약 1700만원",
+    name: "빅콘테스트 (매년 7~8월 공고)",
+    host: "한국지능정보사회진흥원(NIA)",
+    prize: "약 1700만원(2025기준)",
     prizeNum: 17000000,
     deadline: "2026-09-30",
     categories: ["money", "award", "portfolio"],
     skills: ["python", "data", "ai_ml"],
-    description: "국내 대표 데이터 분석 경진대회. 매년 7~8월 공고",
+    description:
+      "국내 대표 데이터 분석 경진대회. 매년 7~8월 공고 예정. 2025년 제13회 기준 상금 1700만원",
     team: "team",
     teamDesc: "팀(2~4인)",
     vibeOk: false,
@@ -225,14 +238,15 @@ const COMPETITIONS = [
   },
   {
     id: 14,
-    name: "전국민 AI - 리부트 AI 활용대회",
+    name: "전국민 AI 경진대회 - 리부트 AI 활용대회",
     host: "과기정통부",
     prize: "총 30억원(전체)",
     prizeNum: 3000000000,
     deadline: "2026-11-30",
     categories: ["learning", "portfolio", "award"],
     skills: ["ai_ml", "plan"],
-    description: "쉬었음 청년, 경력보유 여성 등 대상. 취·창업 연계",
+    description:
+      "쉬었음 청년, 경력보유 여성 등 대상. AI 활용 역량 강화 + 취·창업 연계",
     team: "solo",
     teamDesc: "개인",
     vibeOk: true,
@@ -242,14 +256,15 @@ const COMPETITIONS = [
   },
   {
     id: 15,
-    name: "Dacon 월간 챌린지",
+    name: "Dacon 월간 데이콘 챌린지",
     host: "Dacon",
-    prize: "수상인증서",
+    prize: "수상인증서(상금 소규모)",
     prizeNum: 0,
     deadline: "매월 말",
     categories: ["learning", "portfolio"],
     skills: ["python", "ai_ml", "data"],
-    description: "매달 새로운 ML 문제. 입문자 학습 최적",
+    description:
+      "매달 새로운 ML 문제 출제. 입문자 학습 최적. 우수자 데이콘 채용 프로세스 지원 가능",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: false,
@@ -259,39 +274,228 @@ const COMPETITIONS = [
   },
 ];
 
-// ─── FILTER OPTIONS ─────────────────────────────────────────────────────────
 const PURPOSES = [
-  { key: "money", label: "💰 돈 벌기" },
-  { key: "award", label: "🏆 수상 경력" },
-  { key: "portfolio", label: "📁 포트폴리오" },
-  { key: "learning", label: "📚 학습/성장" },
-  { key: "startup", label: "🚀 창업 준비" },
+  { key: "money", emoji: "💰", label: "돈 벌기", desc: "상금이 곧 정의" },
+  { key: "award", emoji: "🏆", label: "수상 경력", desc: "이력서에 한 줄" },
+  {
+    key: "portfolio",
+    emoji: "📁",
+    label: "포트폴리오",
+    desc: "보여줄 게 필요해",
+  },
+  {
+    key: "learning",
+    emoji: "📚",
+    label: "학습/성장",
+    desc: "실력을 키우고 싶어",
+  },
+  {
+    key: "startup",
+    emoji: "🚀",
+    label: "창업 준비",
+    desc: "사업 아이템 테스트",
+  },
 ];
 
 const BUILD_METHODS = [
-  { key: "vibe", label: "🤖 바이브 코딩" },
-  { key: "code", label: "💻 직접 코딩" },
-  { key: "nocode", label: "🎨 노코드/기획" },
+  { key: "vibe", emoji: "🤖", label: "바이브 코딩", desc: "AI한테 시키면 됨" },
+  { key: "code", emoji: "💻", label: "직접 코딩", desc: "내가 짠다" },
+  { key: "nocode", emoji: "🎨", label: "노코드/기획", desc: "코딩 안 함" },
 ];
 
 const TEAM_OPTIONS = [
-  { key: "solo", label: "🙋 혼자" },
-  { key: "team", label: "👥 팀 있음" },
-  { key: "any", label: "🤷 상관없음" },
+  { key: "solo", emoji: "🙋", label: "혼자", desc: "솔로 플레이" },
+  { key: "team", emoji: "👥", label: "팀 있음", desc: "같이 할 사람 있어" },
+  { key: "any", emoji: "🤷", label: "상관없음", desc: "유연하게" },
 ];
+
+const SKILLS_BY_METHOD = {
+  vibe: [
+    { key: "python", label: "Python" },
+    { key: "ai_ml", label: "AI / ML" },
+    { key: "data", label: "데이터 분석" },
+    { key: "web", label: "웹 개발" },
+    { key: "video", label: "영상 제작" },
+  ],
+  code: [
+    { key: "python", label: "Python" },
+    { key: "ai_ml", label: "AI / ML" },
+    { key: "data", label: "데이터 분석" },
+    { key: "web", label: "웹 개발" },
+    { key: "video", label: "영상 제작" },
+  ],
+  nocode: [
+    { key: "plan", label: "기획/전략" },
+    { key: "video", label: "영상 제작" },
+    { key: "design", label: "디자인" },
+    { key: "data", label: "데이터 분석" },
+  ],
+};
 
 const TIME_OPTIONS = [
-  { key: "low", label: "🌙 주 5시간 이하" },
-  { key: "medium", label: "⚡ 주 10시간+" },
-  { key: "high", label: "🔥 풀타임" },
+  { key: "low", emoji: "🌙", label: "주 5시간 이하", desc: "틈틈이" },
+  { key: "medium", emoji: "⚡", label: "주 10시간+", desc: "꽤 진심" },
+  { key: "high", emoji: "🔥", label: "풀타임 가능", desc: "올인 모드" },
 ];
 
-// ─── MATCHING LOGIC ─────────────────────────────────────────────────────────
+const font = `'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif`;
+
+const S = {
+  root: {
+    fontFamily: font,
+    background: "#0a0a0f",
+    color: "#e2e2e8",
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "24px 16px 80px",
+  },
+  container: {
+    width: "100%",
+    maxWidth: 640,
+    display: "flex",
+    flexDirection: "column",
+    gap: 24,
+  },
+  header: { textAlign: "center", padding: "32px 0 8px" },
+  title: {
+    fontSize: 28,
+    fontWeight: 800,
+    background: "linear-gradient(135deg,#6ee7b7,#3b82f6,#a78bfa)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    letterSpacing: "-0.5px",
+    margin: 0,
+  },
+  subtitle: { color: "#6b6b80", fontSize: 14, marginTop: 8 },
+  updated: { color: "#3a3a4a", fontSize: 11, marginTop: 4 },
+  bubble: (v) => ({
+    background: "#16161e",
+    border: "1px solid #2a2a3a",
+    borderRadius: 20,
+    padding: "24px 20px",
+    opacity: v ? 1 : 0,
+    transform: v ? "translateY(0)" : "translateY(20px)",
+    transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
+  }),
+  question: {
+    fontSize: 18,
+    fontWeight: 700,
+    marginBottom: 16,
+    lineHeight: 1.4,
+  },
+  grid: { display: "grid", gap: 10 },
+  option: (sel, hov) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "14px 16px",
+    borderRadius: 14,
+    border: `1.5px solid ${sel ? "#6ee7b7" : hov ? "#4a4a5a" : "#2a2a3a"}`,
+    background: sel ? "#6ee7b715" : "#0f0f18",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    fontSize: 15,
+  }),
+  optionEmoji: { fontSize: 22, width: 36, textAlign: "center", flexShrink: 0 },
+  optionLabel: { fontWeight: 600 },
+  optionDesc: { fontSize: 12, color: "#6b6b80", marginTop: 2 },
+  chip: (sel) => ({
+    display: "inline-flex",
+    padding: "10px 18px",
+    borderRadius: 24,
+    border: `1.5px solid ${sel ? "#3b82f6" : "#2a2a3a"}`,
+    background: sel ? "#3b82f620" : "#0f0f18",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    fontSize: 14,
+    fontWeight: 500,
+  }),
+  nextBtn: (a) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "14px 32px",
+    borderRadius: 14,
+    border: "none",
+    background: a ? "linear-gradient(135deg,#6ee7b7,#3b82f6)" : "#1a1a28",
+    color: a ? "#0a0a0f" : "#4a4a5a",
+    fontWeight: 700,
+    fontSize: 15,
+    cursor: a ? "pointer" : "default",
+    transition: "all 0.3s ease",
+    marginTop: 8,
+    fontFamily: font,
+  }),
+  card: {
+    background: "#16161e",
+    border: "1px solid #2a2a3a",
+    borderRadius: 18,
+    padding: 20,
+    transition: "all 0.25s ease",
+  },
+  tag: (c) => ({
+    display: "inline-flex",
+    padding: "3px 10px",
+    borderRadius: 8,
+    fontSize: 11,
+    fontWeight: 600,
+    background: c + "18",
+    color: c,
+    border: `1px solid ${c}30`,
+  }),
+  reset: {
+    background: "none",
+    border: "1px solid #2a2a3a",
+    color: "#6b6b80",
+    borderRadius: 12,
+    padding: "10px 20px",
+    cursor: "pointer",
+    fontFamily: font,
+    fontSize: 13,
+    transition: "all 0.2s ease",
+  },
+  aiBox: {
+    background: "linear-gradient(135deg,#6ee7b708,#3b82f608)",
+    border: "1px solid #6ee7b730",
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 1.7,
+    whiteSpace: "pre-wrap",
+  },
+  loading: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: 20,
+    color: "#6b6b80",
+    fontSize: 14,
+  },
+  linkBtn: {
+    display: "inline-flex",
+    padding: "6px 14px",
+    borderRadius: 10,
+    border: "1px solid #3b82f640",
+    background: "#3b82f612",
+    color: "#3b82f6",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: "pointer",
+    textDecoration: "none",
+    marginTop: 8,
+    transition: "all 0.2s ease",
+  },
+};
+
 function matchScore(comp, purpose, buildMethod, teamPref, skills, timePref) {
   let score = 0;
   if (comp.categories.includes(purpose)) score += 3;
   if (buildMethod === "vibe" && comp.vibeOk) score += 2;
   else if (buildMethod === "code" && !comp.nocode) score += 2;
+  else if (buildMethod === "code" && comp.nocode) score += 1;
   else if (buildMethod === "nocode" && comp.nocode) score += 2;
   else if (buildMethod === "nocode" && !comp.nocode) score -= 3;
   if (teamPref === "solo" && comp.team === "team")
@@ -310,67 +514,423 @@ function daysUntil(d) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return 999;
   return Math.ceil((new Date(d) - new Date()) / 86400000);
 }
+function diffColor(tc) {
+  return tc === "low" ? "#6ee7b7" : tc === "medium" ? "#f59e0b" : "#ef4444";
+}
+function timeLabel(tc) {
+  return tc === "low" ? "가볍게" : tc === "medium" ? "중간" : "하드코어";
+}
 
-// ─── MINIMAL RENDER (data + logic verification) ─────────────────────────────
+function DotLoader() {
+  const [d, setD] = useState("");
+  useEffect(() => {
+    const id = setInterval(
+      () => setD((p) => (p.length >= 3 ? "" : p + ".")),
+      400,
+    );
+    return () => clearInterval(id);
+  }, []);
+  return <span>{d}</span>;
+}
+
+function Opt({ item, selected, onClick }) {
+  const [h, setH] = useState(false);
+  return (
+    <div
+      style={S.option(selected, h)}
+      onClick={onClick}
+      onMouseEnter={() => setH(true)}
+      onMouseLeave={() => setH(false)}
+    >
+      <span style={S.optionEmoji}>{item.emoji}</span>
+      <div>
+        <div style={S.optionLabel}>{item.label}</div>
+        <div style={S.optionDesc}>{item.desc}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function CompFinder() {
+  const [step, setStep] = useState(0);
+  const [purpose, setPurpose] = useState(null);
+  const [buildMethod, setBuildMethod] = useState(null);
+  const [teamPref, setTeamPref] = useState(null);
+  const [skills, setSkills] = useState([]);
+  const [timePref, setTimePref] = useState(null);
   const [results, setResults] = useState([]);
+  const [aiAdvice, setAiAdvice] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const bottomRef = useRef(null);
 
-  const runTest = () => {
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [step, results, aiAdvice]);
+
+  const toggleSkill = (k) =>
+    setSkills((p) => (p.includes(k) ? p.filter((s) => s !== k) : [...p, k]));
+  const availableSkills = SKILLS_BY_METHOD[buildMethod] || [];
+
+  const getResults = () => {
     const scored = COMPETITIONS.map((c) => ({
       ...c,
-      ...matchScore(c, "money", "code", "any", ["python", "ai_ml"], "medium"),
+      ...matchScore(c, purpose, buildMethod, teamPref, skills, timePref),
       daysLeft: daysUntil(c.deadline),
     }))
       .filter((c) => c.score >= 2)
-      .sort((a, b) => b.score - a.score);
+      .sort((a, b) => {
+        const aExpired = a.daysLeft <= 0 ? 1 : 0;
+        const bExpired = b.daysLeft <= 0 ? 1 : 0;
+        if (aExpired !== bExpired) return aExpired - bExpired;
+        return b.score - a.score || a.daysLeft - b.daysLeft;
+      });
     setResults(scored);
+    setStep(5);
+    fetchAi(scored.filter((c) => c.daysLeft > 0).slice(0, 6));
+  };
+
+  const fetchAi = async (top) => {
+    // Claude API integration will be added in next iteration
+    return;
+    if (top.length === 0) return;
+    setAiLoading(true);
+    try {
+      const pL = PURPOSES.find((p) => p.key === purpose)?.label;
+      const bL = BUILD_METHODS.find((b) => b.key === buildMethod)?.label;
+      const tL = TEAM_OPTIONS.find((t) => t.key === teamPref)?.label;
+      const tmL = TIME_OPTIONS.find((t) => t.key === timePref)?.label;
+      const allSkills = [
+        ...(SKILLS_BY_METHOD.vibe || []),
+        ...(SKILLS_BY_METHOD.nocode || []),
+      ];
+      const sL = skills.map(
+        (s) => allSkills.find((sk) => sk.key === s)?.label || s,
+      );
+      const cl = top
+        .map(
+          (c) =>
+            `- ${c.name} (상금: ${c.prize}, 마감: ${c.deadline}, ${c.teamDesc})`,
+        )
+        .join("\n");
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: `당신은 AI 대회/공모전 추천 어드바이저입니다. 친근하고 약간 위트있는 톤으로 답변해주세요.\n\n사용자 프로필:\n- 목적: ${pL}\n- 개발 방식: ${bL}\n- 팀 구성: ${tL}\n- 보유 기술: ${sL.join(", ")}\n- 투자 가능 시간: ${tmL}\n\n필터링된 추천 대회:\n${cl}\n\n위 대회들 중 TOP 3를 골라서, 각각 왜 이 사용자에게 맞는지 1~2줄로 설명하고, 마지막에 전체적인 전략 조언을 2~3줄로 해주세요.\n마크다운 쓰지 말고 평문으로. 이모지는 적당히. 전체 답변 15줄 이내.`,
+            },
+          ],
+        }),
+      });
+      const data = await res.json();
+      setAiAdvice(data.content?.map((b) => b.text || "").join("") || "");
+    } catch {
+      setAiAdvice("AI 분석을 불러오지 못했어요. 위 추천 결과를 참고해주세요!");
+    }
+    setAiLoading(false);
+  };
+
+  const reset = () => {
+    setStep(0);
+    setPurpose(null);
+    setBuildMethod(null);
+    setTeamPref(null);
+    setSkills([]);
+    setTimePref(null);
+    setResults([]);
+    setAiAdvice("");
   };
 
   return (
-    <div
-      style={{
-        fontFamily: "system-ui",
-        padding: 24,
-        background: "#0a0a0f",
-        color: "#e2e2e8",
-        minHeight: "100vh",
-      }}
-    >
-      <h1 style={{ fontSize: 24 }}>CompFinder v1 — Data & Logic</h1>
-      <p style={{ color: "#6b6b80" }}>
-        15 verified competitions loaded. Click to test filtering.
-      </p>
-      <button
-        onClick={runTest}
-        style={{
-          padding: "10px 20px",
-          background: "#3b82f6",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          cursor: "pointer",
-          marginBottom: 16,
-        }}
-      >
-        Test: 💰돈벌기 + 💻직접코딩 + Python,AI/ML + ⚡주10시간+
-      </button>
-      {results.map((c) => (
-        <div
-          key={c.id}
-          style={{
-            background: "#16161e",
-            border: "1px solid #2a2a3a",
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 8,
-            opacity: c.daysLeft <= 0 ? 0.5 : 1,
-          }}
-        >
-          <strong>{c.name}</strong> — {c.prize} — D-
-          {c.daysLeft <= 0 ? "마감" : c.daysLeft} — score: {c.score} — skills:{" "}
-          {c.skillMatch}/{c.total}
+    <div style={S.root}>
+      <link
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        rel="stylesheet"
+      />
+      <div style={S.container}>
+        <div style={S.header}>
+          <h1 style={S.title}>🎯 CompFinder</h1>
+          <p style={S.subtitle}>AI 대회 · 공모전 맞춤 추천</p>
+          <p style={S.updated}>데이터 최종 업데이트: 2026.04.06</p>
         </div>
-      ))}
+
+        <div style={S.bubble(true)}>
+          <div style={S.question}>뭘 얻고 싶어요?</div>
+          <div style={S.grid}>
+            {PURPOSES.map((p) => (
+              <Opt
+                key={p.key}
+                item={p}
+                selected={purpose === p.key}
+                onClick={() => {
+                  setPurpose(p.key);
+                  setTimeout(() => setStep((s) => Math.max(s, 1)), 200);
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {step >= 1 && (
+          <div style={S.bubble(true)}>
+            <div style={S.question}>어떻게 만들 거예요?</div>
+            <div style={S.grid}>
+              {BUILD_METHODS.map((b) => (
+                <Opt
+                  key={b.key}
+                  item={b}
+                  selected={buildMethod === b.key}
+                  onClick={() => {
+                    setBuildMethod(b.key);
+                    setSkills([]);
+                    setTimeout(() => setStep((s) => Math.max(s, 2)), 200);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step >= 2 && (
+          <div style={S.bubble(true)}>
+            <div style={S.question}>혼자 할 거예요, 같이 할 거예요?</div>
+            <div style={S.grid}>
+              {TEAM_OPTIONS.map((t) => (
+                <Opt
+                  key={t.key}
+                  item={t}
+                  selected={teamPref === t.key}
+                  onClick={() => {
+                    setTeamPref(t.key);
+                    setTimeout(() => setStep((s) => Math.max(s, 3)), 200);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step >= 3 && (
+          <div style={S.bubble(true)}>
+            <div style={S.question}>어떤 걸 쓸 수 있어요?</div>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                marginBottom: 16,
+              }}
+            >
+              {availableSkills.map((s) => (
+                <div
+                  key={s.key}
+                  style={S.chip(skills.includes(s.key))}
+                  onClick={() => toggleSkill(s.key)}
+                >
+                  {s.label}
+                </div>
+              ))}
+            </div>
+            <button
+              style={S.nextBtn(skills.length > 0)}
+              onClick={() => {
+                if (skills.length > 0) setStep((s) => Math.max(s, 4));
+              }}
+            >
+              다음 →
+            </button>
+          </div>
+        )}
+
+        {step >= 4 && (
+          <div style={S.bubble(true)}>
+            <div style={S.question}>얼마나 시간 쓸 수 있어요?</div>
+            <div style={S.grid}>
+              {TIME_OPTIONS.map((t) => (
+                <Opt
+                  key={t.key}
+                  item={t}
+                  selected={timePref === t.key}
+                  onClick={() => {
+                    setTimePref(t.key);
+                    setTimeout(getResults, 300);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step >= 5 && results.length > 0 && (
+          <div style={S.bubble(true)}>
+            <div style={S.question}>
+              이런 건 어때요? 🎯{" "}
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 400,
+                  color: "#6b6b80",
+                  marginLeft: 8,
+                }}
+              >
+                {results.filter((r) => r.daysLeft > 0).length}개 진행중{" "}
+                {results.filter((r) => r.daysLeft <= 0).length > 0
+                  ? `· ${results.filter((r) => r.daysLeft <= 0).length}개 마감`
+                  : ""}
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {results.map((c) => (
+                <div
+                  key={c.id}
+                  style={{
+                    ...S.card,
+                    borderColor:
+                      hoveredCard === c.id
+                        ? "#3b82f6"
+                        : c.daysLeft <= 0
+                          ? "#1a1a1a"
+                          : "#2a2a3a",
+                    transform:
+                      hoveredCard === c.id ? "translateY(-2px)" : "none",
+                    boxShadow:
+                      hoveredCard === c.id ? "0 8px 24px #3b82f615" : "none",
+                    opacity: c.daysLeft <= 0 ? 0.5 : 1,
+                  }}
+                  onMouseEnter={() => setHoveredCard(c.id)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 16 }}>
+                        {c.name}
+                      </div>
+                      <div
+                        style={{ fontSize: 12, color: "#6b6b80", marginTop: 2 }}
+                      >
+                        {c.host} · {c.teamDesc}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: c.daysLeft <= 0 ? "#4a4a5a" : "#6ee7b7",
+                        whiteSpace: "nowrap",
+                        marginLeft: 12,
+                      }}
+                    >
+                      {c.prize}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#9999aa",
+                      marginBottom: 12,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {c.description}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    <span style={S.tag(diffColor(c.timeCommit))}>
+                      {timeLabel(c.timeCommit)}
+                    </span>
+                    {c.daysLeft <= 0 ? (
+                      <span style={S.tag("#4a4a5a")}>마감됨</span>
+                    ) : (
+                      <span
+                        style={S.tag(c.daysLeft <= 14 ? "#ef4444" : "#3b82f6")}
+                      >
+                        {c.daysLeft <= 14
+                          ? `D-${c.daysLeft} 🔥`
+                          : `D-${c.daysLeft}`}
+                      </span>
+                    )}
+                    {c.total > 0 && (
+                      <span style={S.tag("#a78bfa")}>
+                        기술매칭 {c.skillMatch}/{c.total}
+                      </span>
+                    )}
+                    {c.vibeOk && <span style={S.tag("#f472b6")}>바이브OK</span>}
+                  </div>
+                  {c.url && c.url !== "#" && c.daysLeft > 0 && (
+                    <div>
+                      <a
+                        href={c.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={S.linkBtn}
+                      >
+                        공식 사이트 →
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {aiLoading && (
+              <div style={S.loading}>
+                <span>✨</span> AI가 맞춤 전략을 분석 중<DotLoader />
+              </div>
+            )}
+            {aiAdvice && (
+              <div style={S.aiBox}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#6ee7b7",
+                    fontWeight: 700,
+                    marginBottom: 10,
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  ✨ AI 맞춤 분석
+                </div>
+                {aiAdvice}
+              </div>
+            )}
+            <div style={{ textAlign: "center", marginTop: 16 }}>
+              <button style={S.reset} onClick={reset}>
+                처음부터 다시 →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step >= 5 && results.length === 0 && (
+          <div style={S.bubble(true)}>
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>🤔</div>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>
+                조건에 딱 맞는 대회가 없네요
+              </div>
+              <div style={{ fontSize: 13, color: "#6b6b80", marginBottom: 16 }}>
+                다른 조합으로 다시 시도해보세요
+              </div>
+              <button style={S.reset} onClick={reset}>
+                다시 해볼래요 →
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
     </div>
   );
 }
