@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CompetitionCard from "./components/CompetitionCard.jsx";
 import DotLoader from "./components/DotLoader.jsx";
 import InterestSelector from "./components/InterestSelector.jsx";
