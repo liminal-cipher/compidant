@@ -12,12 +12,12 @@ export default function CompetitionCard({
       style={{
         ...styles.card,
         borderColor: isHovered
-          ? "#3b82f6"
+          ? styles.cardHoverBorder
           : competition.daysLeft <= 0
-            ? "#1a1a1a"
-            : "#2a2a3a",
+            ? styles.cardDeadBorder
+            : undefined,
         transform: isHovered ? "translateY(-2px)" : "none",
-        boxShadow: isHovered ? "0 8px 24px #3b82f615" : "none",
+        boxShadow: isHovered ? `0 8px 24px ${styles.cardShadow}` : "none",
         opacity: competition.daysLeft <= 0 ? 0.5 : 1,
       }}
       onMouseEnter={onMouseEnter}
@@ -35,31 +35,16 @@ export default function CompetitionCard({
           <div style={{ fontWeight: 700, fontSize: 16 }}>
             {competition.name}
           </div>
-          <div style={{ fontSize: 12, color: "#6b6b80", marginTop: 2 }}>
+          <div style={styles.cardMeta}>
             {competition.host} · {competition.teamDesc}
           </div>
         </div>
-        <div
-          style={{
-            fontSize: 13,
-            fontWeight: 700,
-            color: competition.daysLeft <= 0 ? "#4a4a5a" : "#6ee7b7",
-            whiteSpace: "nowrap",
-            marginLeft: 12,
-          }}
-        >
+        <div style={styles.cardPrize(competition.daysLeft <= 0)}>
           {competition.prize}
         </div>
       </div>
 
-      <div
-        style={{
-          fontSize: 13,
-          color: "#9999aa",
-          marginBottom: 12,
-          lineHeight: 1.5,
-        }}
-      >
+      <div style={styles.cardDescription}>
         {competition.description}
       </div>
 
