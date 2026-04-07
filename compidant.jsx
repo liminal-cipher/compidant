@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
-// ─── VERIFIED COMPETITION DATA (as of 2026.04.06) ──────────────────────────
-const COMPETITIONS = [
+// ─── HARDCODED FALLBACK DATA (verified 2026.04.06) ──────────────────────────
+const FALLBACK_COMPETITIONS = [
   {
     id: 1,
     name: "AI 챔피언 대회",
@@ -11,8 +11,7 @@ const COMPETITIONS = [
     deadline: "2026-04-24",
     categories: ["money", "award", "portfolio"],
     skills: ["python", "ai_ml"],
-    description:
-      "AI 전 분야 최고 수준 연구팀 간 경쟁. 1위 5억원. 전국민 AI 경진대회 핵심 트랙",
+    description: "AI 전 분야 최고 수준 연구팀 간 경쟁. 1위 5억원",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: false,
@@ -29,8 +28,7 @@ const COMPETITIONS = [
     deadline: "2026-05-08",
     categories: ["money", "award", "learning", "portfolio"],
     skills: ["python", "ai_ml", "web"],
-    description:
-      "전공무관 대학생(만34세 이하 학사미소지) 대상. 일반트랙 + 국내AI트랙. 1위 5000만원",
+    description: "전공무관 대학생(만34세 이하) 대상. 1위 5000만원",
     team: "both",
     teamDesc: "개인/팀(중복3개팀까지)",
     vibeOk: true,
@@ -47,8 +45,7 @@ const COMPETITIONS = [
     deadline: "2026-11-30",
     categories: ["learning", "award"],
     skills: [],
-    description:
-      "코딩 없이 AI 지식 퀴즈로 참여. 초등학생~어르신 누구나. 누적 점수로 시상",
+    description: "코딩 없이 AI 지식 퀴즈로 참여. 누구나 가능",
     team: "solo",
     teamDesc: "개인",
     vibeOk: false,
@@ -65,8 +62,7 @@ const COMPETITIONS = [
     deadline: "2026-11-30",
     categories: ["portfolio", "award", "learning"],
     skills: ["ai_ml", "video", "design"],
-    description:
-      "미드저니 등 생성형 AI를 활용한 창작 콘텐츠 제작. 초중고~일반인",
+    description: "생성형 AI를 활용한 창작 콘텐츠 제작",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -83,8 +79,7 @@ const COMPETITIONS = [
     deadline: "2026-11-30",
     categories: ["portfolio", "award", "startup"],
     skills: ["ai_ml", "web", "data", "plan"],
-    description:
-      "일상/업무에서 AI를 활용한 혁신 사례 공모. 국내 AI 서비스 활용 권장",
+    description: "AI를 활용한 혁신 사례 공모. 국내 AI 서비스 활용 권장",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -96,15 +91,14 @@ const COMPETITIONS = [
     id: 6,
     name: "AI Co-Scientist Challenge Korea",
     host: "과기정통부·한국연구재단",
-    prize: "대상 최대 25억원 사업화지원",
+    prize: "최대 25억원 사업화지원",
     prizeNum: 2500000000,
     deadline: "2026-04-03",
     categories: ["award", "portfolio", "money"],
     skills: ["python", "ai_ml"],
-    description:
-      "Track1: AI활용 연구보고서 작성, Track2: 과학기술 AI Agent 개발. AI Factory에서 진행",
+    description: "AI활용 연구보고서 + AI Agent 개발",
     team: "both",
-    teamDesc: "개인/팀(인원제한없음)",
+    teamDesc: "개인/팀",
     vibeOk: false,
     nocode: false,
     timeCommit: "high",
@@ -119,8 +113,7 @@ const COMPETITIONS = [
     deadline: "2026-05-13",
     categories: ["portfolio", "award", "startup"],
     skills: ["python", "data", "ai_ml", "web"],
-    description:
-      "서울 공공데이터+AI기술 필수 활용. 시각화/분석/창업 3개 부문. 빅데이터캠퍼스 방문 필수",
+    description: "서울 공공데이터+AI기술 필수. 3개 부문",
     team: "both",
     teamDesc: "개인/팀(5명이내)",
     vibeOk: false,
@@ -131,14 +124,13 @@ const COMPETITIONS = [
   {
     id: 8,
     name: "AI·SW중심대학 디지털 경진대회",
-    host: "정보통신기획평가원(IITP)",
+    host: "IITP",
     prize: "미정(후원기업상 포함)",
     prizeNum: 10000000,
     deadline: "2026-08-11",
     categories: ["award", "learning", "portfolio"],
     skills: ["python", "ai_ml", "web"],
-    description:
-      "SW부문: AI Agent 기반 SW개발, AI부문: AI Agent 의사결정 예측 챌린지. 예선 온라인/본선 대한상의",
+    description: "AI Agent 기반 SW개발 + 의사결정 예측 챌린지",
     team: "team",
     teamDesc: "팀",
     vibeOk: false,
@@ -150,13 +142,12 @@ const COMPETITIONS = [
     id: 9,
     name: "국토·교통 데이터 활용 경진대회",
     host: "국토교통부",
-    prize: "미정(창업연계지원)",
+    prize: "창업연계지원",
     prizeNum: 5000000,
     deadline: "2026-06-30",
     categories: ["startup", "portfolio", "award"],
     skills: ["data", "ai_ml", "web", "plan"],
-    description:
-      "국토교통 데이터+AI 활용. 아이디어 부문 + 제품·서비스 개발 부문. 10팀 선발 후 창업연계",
+    description: "국토교통 데이터+AI. 10팀 선발 후 창업연계",
     team: "both",
     teamDesc: "개인/팀(3인이하)",
     vibeOk: true,
@@ -166,15 +157,14 @@ const COMPETITIONS = [
   },
   {
     id: 10,
-    name: "전국민 AI 경진대회 - 국민행복 AI 경진대회",
+    name: "전국민 AI 경진대회 - 국민행복 AI",
     host: "과기정통부",
     prize: "총 30억원(전체)",
     prizeNum: 3000000000,
     deadline: "2026-11-30",
     categories: ["learning", "award"],
     skills: ["plan"],
-    description:
-      "디지털 취약계층(어르신·장애인 등) 대상 기초 AI 활용 능력 대회",
+    description: "디지털 취약계층 대상 기초 AI 활용 대회",
     team: "solo",
     teamDesc: "개인",
     vibeOk: false,
@@ -191,8 +181,7 @@ const COMPETITIONS = [
     deadline: "2026-05-31",
     categories: ["startup", "money"],
     skills: ["ai_ml", "web", "plan", "data"],
-    description:
-      "전국민 창업 오디션. 5000명 선발, 활동자금 200만원~최종 10억원. 기술트랙+로컬트랙",
+    description: "전국민 창업 오디션. 5000명 선발, 200만원~10억원",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -202,15 +191,14 @@ const COMPETITIONS = [
   },
   {
     id: 12,
-    name: "KBI 금융 AI 리터러시 콘텐츠 공모전",
+    name: "KBI 금융 AI 콘텐츠 공모전",
     host: "한국금융연수원",
     prize: "대상 100만원",
     prizeNum: 1000000,
     deadline: "2026-04-13",
     categories: ["portfolio", "learning"],
     skills: ["ai_ml", "video", "design"],
-    description:
-      "생성형 AI로 금융 홍보 콘텐츠(카드뉴스/영상) 제작. ChatGPT, 미드저니 등 활용",
+    description: "생성형 AI로 금융 홍보 콘텐츠 제작",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: true,
@@ -221,14 +209,13 @@ const COMPETITIONS = [
   {
     id: 13,
     name: "빅콘테스트 (매년 7~8월 공고)",
-    host: "한국지능정보사회진흥원(NIA)",
-    prize: "약 1700만원(2025기준)",
+    host: "NIA",
+    prize: "약 1700만원",
     prizeNum: 17000000,
     deadline: "2026-09-30",
     categories: ["money", "award", "portfolio"],
     skills: ["python", "data", "ai_ml"],
-    description:
-      "국내 대표 데이터 분석 경진대회. 매년 7~8월 공고 예정. 2025년 제13회 기준 상금 1700만원",
+    description: "국내 대표 데이터 분석 경진대회. 매년 7~8월 공고",
     team: "team",
     teamDesc: "팀(2~4인)",
     vibeOk: false,
@@ -238,15 +225,14 @@ const COMPETITIONS = [
   },
   {
     id: 14,
-    name: "전국민 AI 경진대회 - 리부트 AI 활용대회",
+    name: "전국민 AI 경진대회 - 리부트 AI",
     host: "과기정통부",
     prize: "총 30억원(전체)",
     prizeNum: 3000000000,
     deadline: "2026-11-30",
     categories: ["learning", "portfolio", "award"],
     skills: ["ai_ml", "plan"],
-    description:
-      "쉬었음 청년, 경력보유 여성 등 대상. AI 활용 역량 강화 + 취·창업 연계",
+    description: "쉬었음 청년, 경력보유 여성 등 대상. 취·창업 연계",
     team: "solo",
     teamDesc: "개인",
     vibeOk: true,
@@ -258,13 +244,12 @@ const COMPETITIONS = [
     id: 15,
     name: "Dacon 월간 데이콘 챌린지",
     host: "Dacon",
-    prize: "수상인증서(상금 소규모)",
+    prize: "수상인증서",
     prizeNum: 0,
     deadline: "매월 말",
     categories: ["learning", "portfolio"],
     skills: ["python", "ai_ml", "data"],
-    description:
-      "매달 새로운 ML 문제 출제. 입문자 학습 최적. 우수자 데이콘 채용 프로세스 지원 가능",
+    description: "매달 새로운 ML 문제. 입문자 학습 최적",
     team: "both",
     teamDesc: "개인/팀",
     vibeOk: false,
@@ -274,6 +259,7 @@ const COMPETITIONS = [
   },
 ];
 
+// ─── OPTIONS ────────────────────────────────────────────────────────────────
 const PURPOSES = [
   {
     key: "learning",
@@ -287,18 +273,8 @@ const PURPOSES = [
     label: "포트폴리오",
     desc: "보여줄 게 필요해",
   },
-  {
-    key: "award",
-    emoji: "🏆",
-    label: "수상 경력",
-    desc: "이력서에 한 줄",
-  },
-  {
-    key: "money",
-    emoji: "💰",
-    label: "돈 벌기",
-    desc: "상금이 곧 정의",
-  },
+  { key: "award", emoji: "🏆", label: "수상 경력", desc: "이력서에 한 줄" },
+  { key: "money", emoji: "💰", label: "돈 벌기", desc: "상금이 곧 정의" },
   {
     key: "startup",
     emoji: "🚀",
@@ -348,8 +324,8 @@ const TIME_OPTIONS = [
   { key: "high", emoji: "🔥", label: "풀타임 가능", desc: "올인 모드" },
 ];
 
+// ─── STYLES ─────────────────────────────────────────────────────────────────
 const font = `'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif`;
-
 const S = {
   root: {
     fontFamily: font,
@@ -498,8 +474,37 @@ const S = {
     marginTop: 8,
     transition: "all 0.2s ease",
   },
+  refreshBtn: (loading) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "8px 16px",
+    borderRadius: 12,
+    border: "1px solid #a78bfa40",
+    background: "#a78bfa12",
+    color: "#a78bfa",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: loading ? "default" : "pointer",
+    fontFamily: font,
+    transition: "all 0.2s ease",
+    opacity: loading ? 0.6 : 1,
+  }),
+  dataBadge: (isLive) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 4,
+    padding: "2px 8px",
+    borderRadius: 6,
+    fontSize: 10,
+    fontWeight: 600,
+    background: isLive ? "#6ee7b718" : "#f59e0b18",
+    color: isLive ? "#6ee7b7" : "#f59e0b",
+    border: `1px solid ${isLive ? "#6ee7b730" : "#f59e0b30"}`,
+  }),
 };
 
+// ─── HELPERS ────────────────────────────────────────────────────────────────
 function matchScore(comp, purpose, buildMethod, teamPref, skills, timePref) {
   let score = 0;
   if (comp.categories.includes(purpose)) score += 3;
@@ -561,6 +566,7 @@ function Opt({ item, selected, onClick }) {
   );
 }
 
+// ─── MAIN ───────────────────────────────────────────────────────────────────
 export default function Compidant() {
   const [step, setStep] = useState(0);
   const [purpose, setPurpose] = useState(null);
@@ -572,6 +578,9 @@ export default function Compidant() {
   const [aiAdvice, setAiAdvice] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [competitions, setCompetitions] = useState(FALLBACK_COMPETITIONS);
+  const [dataSource, setDataSource] = useState("hardcoded"); // "hardcoded" | "live"
+  const [searchLoading, setSearchLoading] = useState(false);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -582,17 +591,86 @@ export default function Compidant() {
     setSkills((p) => (p.includes(k) ? p.filter((s) => s !== k) : [...p, k]));
   const availableSkills = SKILLS_BY_METHOD[buildMethod] || [];
 
+  // ─── LIVE DATA FETCH via Claude API + web_search ────────────────────────
+  const fetchLiveData = async () => {
+    setSearchLoading(true);
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 4000,
+          tools: [{ type: "web_search_20250305", name: "web_search" }],
+          messages: [
+            {
+              role: "user",
+              content: `오늘은 ${today}입니다. 현재 접수 가능하거나 곧 접수 예정인 한국 AI/데이터 경진대회, 해커톤, 공모전을 찾아주세요. Dacon, AI Factory, 올콘, 위비티, 정부 공고 등을 검색해서 현재 진행 중인 대회를 최대한 많이 찾아주세요.
+
+각 대회에 대해 아래 JSON 배열 형식으로만 응답해주세요. 설명 텍스트 없이 JSON만:
+[
+  {
+    "name": "대회명",
+    "host": "주최기관",
+    "prize": "상금(문자열)",
+    "prizeNum": 숫자(원단위),
+    "deadline": "YYYY-MM-DD",
+    "categories": ["money","award","portfolio","learning","startup" 중 해당하는 것],
+    "skills": ["python","ai_ml","data","web","video","plan","design" 중 해당하는 것],
+    "description": "한줄설명",
+    "team": "solo" 또는 "team" 또는 "both",
+    "teamDesc": "참가구성 설명",
+    "vibeOk": true/false (바이브코딩으로 참여 가능한지),
+    "nocode": true/false (코딩 없이 참여 가능한지),
+    "timeCommit": "low" 또는 "medium" 또는 "high",
+    "url": "공식URL"
+  }
+]
+
+마감일이 지난 대회는 제외하고, 마감일을 모르면 합리적으로 추정해주세요. 최소 10개 이상 찾아주세요.`,
+            },
+          ],
+        }),
+      });
+      const data = await res.json();
+      const text =
+        data.content
+          ?.filter((b) => b.type === "text")
+          .map((b) => b.text)
+          .join("") || "";
+
+      // Extract JSON from response
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        const withIds = parsed.map((c, i) => ({ ...c, id: 100 + i }));
+        // Merge: keep fallback data, add new ones that don't overlap by name
+        const fallbackNames = new Set(FALLBACK_COMPETITIONS.map((c) => c.name));
+        const newComps = withIds.filter((c) => !fallbackNames.has(c.name));
+        const merged = [...FALLBACK_COMPETITIONS, ...newComps];
+        setCompetitions(merged);
+        setDataSource("live");
+      }
+    } catch (e) {
+      console.error("Live data fetch failed:", e);
+    }
+    setSearchLoading(false);
+  };
+
+  // ─── FILTERING & AI ─────────────────────────────────────────────────────
   const getResults = () => {
-    const scored = COMPETITIONS.map((c) => ({
-      ...c,
-      ...matchScore(c, purpose, buildMethod, teamPref, skills, timePref),
-      daysLeft: daysUntil(c.deadline),
-    }))
+    const scored = competitions
+      .map((c) => ({
+        ...c,
+        ...matchScore(c, purpose, buildMethod, teamPref, skills, timePref),
+        daysLeft: daysUntil(c.deadline),
+      }))
       .filter((c) => c.score >= 2)
       .sort((a, b) => {
-        const aExpired = a.daysLeft <= 0 ? 1 : 0;
-        const bExpired = b.daysLeft <= 0 ? 1 : 0;
-        if (aExpired !== bExpired) return aExpired - bExpired;
+        const aExp = a.daysLeft <= 0 ? 1 : 0;
+        const bExp = b.daysLeft <= 0 ? 1 : 0;
+        if (aExp !== bExp) return aExp - bExp;
         return b.score - a.score || a.daysLeft - b.daysLeft;
       });
     setResults(scored);
@@ -665,7 +743,33 @@ export default function Compidant() {
         <div style={S.header}>
           <h1 style={S.title}>🎯 Compidant</h1>
           <p style={S.subtitle}>AI 대회 · 공모전 맞춤 추천</p>
-          <p style={S.updated}>데이터 최종 업데이트: 2026.04.06</p>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              marginTop: 8,
+            }}
+          >
+            <span style={S.dataBadge(dataSource === "live")}>
+              {dataSource === "live"
+                ? "🟢 실시간 데이터"
+                : "🟡 저장된 데이터 (2026.04.06)"}
+            </span>
+            <button
+              style={S.refreshBtn(searchLoading)}
+              onClick={() => !searchLoading && fetchLiveData()}
+            >
+              {searchLoading ? (
+                <>
+                  검색 중<DotLoader />
+                </>
+              ) : (
+                "🔄 최신 대회 검색"
+              )}
+            </button>
+          </div>
         </div>
 
         <div style={S.bubble(true)}>
@@ -778,7 +882,7 @@ export default function Compidant() {
         {step >= 5 && results.length > 0 && (
           <div style={S.bubble(true)}>
             <div style={S.question}>
-              이런 건 어때요? 🎯{" "}
+              이런 건 어때요? 🎯
               <span
                 style={{
                   fontSize: 13,
@@ -787,9 +891,9 @@ export default function Compidant() {
                   marginLeft: 8,
                 }}
               >
-                {results.filter((r) => r.daysLeft > 0).length}개 진행중{" "}
+                {results.filter((r) => r.daysLeft > 0).length}개 진행중
                 {results.filter((r) => r.daysLeft <= 0).length > 0
-                  ? `· ${results.filter((r) => r.daysLeft <= 0).length}개 마감`
+                  ? ` · ${results.filter((r) => r.daysLeft <= 0).length}개 마감`
                   : ""}
               </span>
             </div>
@@ -875,6 +979,7 @@ export default function Compidant() {
                       </span>
                     )}
                     {c.vibeOk && <span style={S.tag("#f472b6")}>바이브OK</span>}
+                    {c.id >= 100 && <span style={S.tag("#6ee7b7")}>NEW</span>}
                   </div>
                   {c.url && c.url !== "#" && c.daysLeft > 0 && (
                     <div>
