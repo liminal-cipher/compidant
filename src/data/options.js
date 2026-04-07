@@ -41,3 +41,24 @@ export const INTERESTS = [
   { key: "content", emoji: "🎨", label: "콘텐츠/디자인" },
   { key: "hardware", emoji: "🔧", label: "하드웨어/IoT" },
 ];
+
+export const AI_MODES = [
+  {
+    key: "basic",
+    emoji: "🧭",
+    label: "기본 추천",
+    desc: "저장된 데이터만 사용하고 AI는 쓰지 않음",
+  },
+  {
+    key: "gemini",
+    emoji: "✨",
+    label: "Gemini API",
+    desc: "개인 API 키로 AI 분석과 최신 검색 사용",
+  },
+  {
+    key: "artifact",
+    emoji: "🧪",
+    label: "Claude Artifact",
+    desc: "Artifact 환경에서 Claude 기반 AI 기능 사용",
+  },
+];
