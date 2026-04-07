@@ -5,6 +5,7 @@ import InterestSelector from "./components/InterestSelector.jsx";
 import OptionCard from "./components/OptionCard.jsx";
 import { FALLBACK_COMPETITIONS } from "./data/competitions.js";
 import {
+  AI_MODES,
   BUILD_METHODS,
   INTERESTS,
   PURPOSES,
@@ -15,6 +16,13 @@ import { fetchAiAdvice } from "./services/aiAdvice.js";
 import { fetchLiveCompetitions } from "./services/competitionSearch.js";
 
 const font = `'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif`;
+
+const STORAGE_KEYS = {
+  aiMode: "compidant-ai-mode",
+  geminiApiKey: "compidant-gemini-api-key",
+};
+
+const DEFAULT_AI_MODE = "basic";
 
 const S = {
   root: {
@@ -163,7 +171,7 @@ const S = {
     marginTop: 8,
     transition: "all 0.2s ease",
   },
-  refreshBtn: (loading) => ({
+  refreshBtn: (disabled) => ({
     display: "inline-flex",
     alignItems: "center",
     gap: 6,
@@ -174,10 +182,10 @@ const S = {
     color: "#a78bfa",
     fontSize: 12,
     fontWeight: 600,
-    cursor: loading ? "default" : "pointer",
+    cursor: disabled ? "default" : "pointer",
     fontFamily: font,
     transition: "all 0.2s ease",
-    opacity: loading ? 0.6 : 1,
+    opacity: disabled ? 0.6 : 1,
   }),
   dataBadge: (isLive) => ({
     display: "inline-flex",
@@ -198,13 +206,49 @@ const S = {
     fontSize: 13,
     lineHeight: 1.6,
     border:
-      tone === "warning" ? "1px solid #f59e0b30" : "1px solid #6ee7b730",
+      tone === "warning"
+        ? "1px solid #f59e0b30"
+        : tone === "info"
+          ? "1px solid #3b82f630"
+          : "1px solid #6ee7b730",
     background:
       tone === "warning"
         ? "linear-gradient(135deg,#f59e0b10,#f9731608)"
-        : "linear-gradient(135deg,#6ee7b710,#3b82f608)",
-    color: tone === "warning" ? "#fcd34d" : "#b6f5d6",
+        : tone === "info"
+          ? "linear-gradient(135deg,#3b82f610,#06b6d408)"
+          : "linear-gradient(135deg,#6ee7b710,#3b82f608)",
+    color:
+      tone === "warning"
+        ? "#fcd34d"
+        : tone === "info"
+          ? "#bfdbfe"
+          : "#b6f5d6",
   }),
+  fieldLabel: {
+    display: "block",
+    fontSize: 12,
+    color: "#8d8da3",
+    marginBottom: 8,
+    fontWeight: 600,
+  },
+  textInput: {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "12px 14px",
+    borderRadius: 12,
+    border: "1px solid #2a2a3a",
+    background: "#0f0f18",
+    color: "#e2e2e8",
+    fontSize: 14,
+    fontFamily: font,
+    outline: "none",
+  },
+  fieldHelp: {
+    fontSize: 12,
+    color: "#6b6b80",
+    marginTop: 8,
+    lineHeight: 1.6,
+  },
 };
 
 const INITIAL_PROFILE = {
@@ -222,7 +266,55 @@ const INITIAL_UI = {
   hoveredCard: null,
   error: "",
   searchNotice: "",
+  resultNotice: "",
 };
+
+function canUseStorage() {
+  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+}
+
+function readStorageValue(key, fallbackValue) {
+  if (!canUseStorage()) return fallbackValue;
+
+  try {
+    return window.localStorage.getItem(key) ?? fallbackValue;
+  } catch {
+    return fallbackValue;
+  }
+}
+
+function writeStorageValue(key, value) {
+  if (!canUseStorage()) return;
+
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage failures so the UI still works in restricted environments.
+  }
+}
+
+function getStoredAiMode() {
+  const storedMode = readStorageValue(STORAGE_KEYS.aiMode, DEFAULT_AI_MODE);
+  return AI_MODES.some((mode) => mode.key === storedMode)
+    ? storedMode
+    : DEFAULT_AI_MODE;
+}
+
+function getModeSummary(mode, hasGeminiApiKey) {
+  if (mode === "basic") {
+    return "기본 추천 모드는 저장된 대회 데이터와 규칙 기반 매칭만 사용해요.";
+  }
+
+  if (mode === "gemini" && !hasGeminiApiKey) {
+    return "Gemini API 키를 넣으면 AI 분석과 최신 대회 검색을 사용할 수 있어요.";
+  }
+
+  if (mode === "gemini") {
+    return "Gemini API를 통해 AI 분석과 최신 대회 검색을 함께 사용할 수 있어요.";
+  }
+
+  return "Claude Artifact 모드는 Artifact 환경에서 Claude 기반 AI 기능을 사용하는 설정이에요.";
+}
 
 export default function Compidant() {
   const [profile, setProfile] = useState(INITIAL_PROFILE);
@@ -232,11 +324,36 @@ export default function Compidant() {
     dataSource: "hardcoded",
   });
   const [uiState, setUiState] = useState(INITIAL_UI);
+  const [aiConfig, setAiConfig] = useState({
+    mode: getStoredAiMode(),
+    geminiApiKey: readStorageValue(STORAGE_KEYS.geminiApiKey, ""),
+  });
   const bottomRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [uiState.step, dataState.results, uiState.aiAdvice]);
+
+  useEffect(() => {
+    writeStorageValue(STORAGE_KEYS.aiMode, aiConfig.mode);
+  }, [aiConfig.mode]);
+
+  useEffect(() => {
+    writeStorageValue(STORAGE_KEYS.geminiApiKey, aiConfig.geminiApiKey);
+  }, [aiConfig.geminiApiKey]);
+
+  const hasGeminiApiKey = aiConfig.geminiApiKey.trim().length > 0;
+  const canUseAiFeatures =
+    aiConfig.mode === "artifact" ||
+    (aiConfig.mode === "gemini" && hasGeminiApiKey);
+  const currentModeSummary = getModeSummary(aiConfig.mode, hasGeminiApiKey);
+  const liveSearchDisabled = uiState.searchLoading || !canUseAiFeatures;
+  const liveSearchButtonLabel =
+    aiConfig.mode === "basic"
+      ? "기본 데이터 모드"
+      : aiConfig.mode === "gemini" && !hasGeminiApiKey
+        ? "Gemini 키 필요"
+        : "🔄 최신 대회 검색";
 
   const updateUi = (updates) => {
     setUiState((previous) => ({ ...previous, ...updates }));
@@ -261,14 +378,42 @@ export default function Compidant() {
     }));
   };
 
+  const handleModeChange = (mode) => {
+    setAiConfig((previous) => ({ ...previous, mode }));
+    setDataState((previous) => ({
+      ...previous,
+      competitions: FALLBACK_COMPETITIONS,
+      results: [],
+      dataSource: "hardcoded",
+    }));
+    updateUi({
+      error: "",
+      searchNotice: "",
+      resultNotice: "",
+      aiAdvice: "",
+      aiLoading: false,
+      searchLoading: false,
+    });
+  };
+
+  const handleGeminiApiKeyChange = (event) => {
+    setAiConfig((previous) => ({
+      ...previous,
+      geminiApiKey: event.target.value,
+    }));
+    updateUi({ error: "", searchNotice: "" });
+  };
+
   const handleFetchLiveData = async () => {
-    if (uiState.searchLoading) return;
+    if (liveSearchDisabled) return;
 
     updateUi({ searchLoading: true, error: "", searchNotice: "" });
 
     try {
       const liveResult = await fetchLiveCompetitions({
+        mode: aiConfig.mode,
         existingCompetitions: dataState.competitions,
+        geminiApiKey: aiConfig.geminiApiKey,
       });
 
       setDataState((previous) => ({
@@ -286,19 +431,32 @@ export default function Compidant() {
 
   const handleGetResults = async () => {
     const results = getRecommendedCompetitions(dataState.competitions, profile);
+    const resultNotice =
+      aiConfig.mode === "basic"
+        ? "기본 추천 모드에서는 AI 분석 없이 규칙 기반 추천 결과만 보여줘요."
+        : aiConfig.mode === "gemini" && !hasGeminiApiKey
+          ? "Gemini API 키를 입력하면 이 결과에 AI 분석과 최신 검색을 추가할 수 있어요."
+          : "";
 
     setDataState((previous) => ({ ...previous, results }));
-    updateUi({ step: 4, aiAdvice: "", error: "" });
+    updateUi({
+      step: 4,
+      aiAdvice: "",
+      error: "",
+      resultNotice,
+    });
 
     const activeCompetitions = results
       .filter((competition) => competition.daysLeft > 0)
       .slice(0, 6);
 
-    if (!activeCompetitions.length) return;
+    if (!activeCompetitions.length || !canUseAiFeatures) return;
 
     updateUi({ aiLoading: true });
     try {
       const advice = await fetchAiAdvice({
+        mode: aiConfig.mode,
+        geminiApiKey: aiConfig.geminiApiKey,
         profile,
         competitions: activeCompetitions,
       });
@@ -312,7 +470,12 @@ export default function Compidant() {
 
   const reset = () => {
     setProfile(INITIAL_PROFILE);
-    setDataState((previous) => ({ ...previous, results: [] }));
+    setDataState((previous) => ({
+      ...previous,
+      competitions: FALLBACK_COMPETITIONS,
+      results: [],
+      dataSource: "hardcoded",
+    }));
     setUiState((previous) => ({
       ...INITIAL_UI,
       searchNotice: previous.searchNotice,
@@ -337,6 +500,46 @@ export default function Compidant() {
         <div style={S.header}>
           <h1 style={S.title}>🎯 Compidant</h1>
           <p style={S.subtitle}>AI 대회 · 공모전 맞춤 추천</p>
+        </div>
+
+        <div style={S.bubble(true)}>
+          <div style={S.question}>어떤 모드로 사용할까요?</div>
+          <div style={S.grid}>
+            {AI_MODES.map((mode) => (
+              <OptionCard
+                key={mode.key}
+                item={mode}
+                selected={aiConfig.mode === mode.key}
+                onClick={() => handleModeChange(mode.key)}
+                optionStyle={S.option}
+                optionEmojiStyle={S.optionEmoji}
+                optionLabelStyle={S.optionLabel}
+                optionDescStyle={S.optionDesc}
+              />
+            ))}
+          </div>
+
+          <div style={S.statusBox("info")}>{currentModeSummary}</div>
+
+          {aiConfig.mode === "gemini" && (
+            <div style={{ marginTop: 16 }}>
+              <label style={S.fieldLabel} htmlFor="gemini-api-key">
+                Gemini API 키
+              </label>
+              <input
+                id="gemini-api-key"
+                type="password"
+                value={aiConfig.geminiApiKey}
+                onChange={handleGeminiApiKeyChange}
+                placeholder="AIza..."
+                style={S.textInput}
+              />
+              <div style={S.fieldHelp}>
+                이 키는 현재 브라우저의 localStorage에만 저장돼요. Gemini 모드의
+                AI 분석과 최신 검색에만 사용합니다.
+              </div>
+            </div>
+          )}
 
           <div
             style={{
@@ -344,7 +547,7 @@ export default function Compidant() {
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              marginTop: 8,
+              marginTop: 16,
               flexWrap: "wrap",
             }}
           >
@@ -355,7 +558,7 @@ export default function Compidant() {
             </span>
 
             <button
-              style={S.refreshBtn(uiState.searchLoading)}
+              style={S.refreshBtn(liveSearchDisabled)}
               onClick={handleFetchLiveData}
             >
               {uiState.searchLoading ? (
@@ -363,7 +566,7 @@ export default function Compidant() {
                   검색 중<DotLoader />
                 </>
               ) : (
-                "🔄 최신 대회 검색"
+                liveSearchButtonLabel
               )}
             </button>
           </div>
@@ -475,6 +678,10 @@ export default function Compidant() {
                 {expiredResultCount > 0 ? ` · ${expiredResultCount}개 마감` : ""}
               </span>
             </div>
+
+            {uiState.resultNotice && (
+              <div style={S.statusBox("info")}>{uiState.resultNotice}</div>
+            )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {dataState.results.map((competition) => (
