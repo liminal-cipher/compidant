@@ -6,7 +6,10 @@ import {
 } from "../data/options.js";
 
 const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
-const AI_ADVICE_MODEL = "claude-sonnet-4-20250514";
+const ANTHROPIC_AI_MODEL = "claude-sonnet-4-20250514";
+const GEMINI_API_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_AI_MODEL = "gemini-2.5-flash";
 
 export const AI_ADVICE_FALLBACK_MESSAGE =
   "AI 분석을 불러오지 못했어요. 위 추천 결과를 참고해주세요!";
@@ -21,11 +24,19 @@ function findLabel(options, key) {
   return options.find((option) => option.key === key)?.label || key;
 }
 
-function getTextContentBlocks(data) {
+function getAnthropicTextContent(data) {
   return (
     data.content
       ?.filter((block) => block.type === "text")
       .map((block) => block.text || "")
+      .join("") || ""
+  ).trim();
+}
+
+function getGeminiTextContent(data) {
+  return (
+    data.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text || "")
       .join("") || ""
   ).trim();
 }
@@ -59,27 +70,37 @@ ${competitionList}
 마크다운 쓰지 말고 평문으로. 이모지는 적당히. 전체 답변 15줄 이내.`;
 }
 
-export async function fetchAiAdvice({
-  profile,
-  competitions,
-  fetchImpl = globalThis.fetch,
-}) {
-  if (!competitions.length) return "";
+function getMissingGeminiKeyError() {
+  return createServiceError(
+    "GEMINI_API_KEY_MISSING",
+    "Gemini 모드에서는 API 키가 있어야 AI 분석을 사용할 수 있어요.",
+  );
+}
 
-  if (typeof fetchImpl !== "function") {
+async function parseJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch {
     throw createServiceError(
-      "AI_FETCH_UNAVAILABLE",
+      "AI_RESPONSE_INVALID",
       AI_ADVICE_FALLBACK_MESSAGE,
     );
   }
+}
 
+async function fetchAnthropicAdvice({
+  fetchImpl,
+  profile,
+  competitions,
+}) {
   let response;
+
   try {
     response = await fetchImpl(ANTHROPIC_MESSAGES_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: AI_ADVICE_MODEL,
+        model: ANTHROPIC_AI_MODEL,
         max_tokens: 1000,
         messages: [
           {
@@ -93,17 +114,93 @@ export async function fetchAiAdvice({
     throw createServiceError("AI_FETCH_FAILED", AI_ADVICE_FALLBACK_MESSAGE);
   }
 
-  let data;
+  if (!response.ok) {
+    throw createServiceError("AI_FETCH_FAILED", AI_ADVICE_FALLBACK_MESSAGE);
+  }
+
+  const data = await parseJsonResponse(response);
+  return getAnthropicTextContent(data);
+}
+
+async function fetchGeminiAdvice({
+  fetchImpl,
+  profile,
+  competitions,
+  geminiApiKey,
+}) {
+  if (!geminiApiKey) {
+    throw getMissingGeminiKeyError();
+  }
+
+  let response;
+
   try {
-    data = await response.json();
+    response = await fetchImpl(
+      `${GEMINI_API_URL}/${GEMINI_AI_MODEL}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": geminiApiKey,
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: buildAdvicePrompt(profile, competitions) }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1000,
+          },
+        }),
+      },
+    );
   } catch {
+    throw createServiceError("AI_FETCH_FAILED", AI_ADVICE_FALLBACK_MESSAGE);
+  }
+
+  if (!response.ok) {
     throw createServiceError(
-      "AI_RESPONSE_INVALID",
+      "AI_FETCH_FAILED",
+      "Gemini AI 분석에 실패했어요. API 키와 사용량 한도를 확인해주세요.",
+    );
+  }
+
+  const data = await parseJsonResponse(response);
+  return getGeminiTextContent(data);
+}
+
+export async function fetchAiAdvice({
+  mode,
+  geminiApiKey = "",
+  profile,
+  competitions,
+  fetchImpl = globalThis.fetch,
+}) {
+  if (!competitions.length || mode === "basic") return "";
+
+  if (typeof fetchImpl !== "function") {
+    throw createServiceError(
+      "AI_FETCH_UNAVAILABLE",
       AI_ADVICE_FALLBACK_MESSAGE,
     );
   }
 
-  const advice = getTextContentBlocks(data);
+  const advice =
+    mode === "gemini"
+      ? await fetchGeminiAdvice({
+          fetchImpl,
+          profile,
+          competitions,
+          geminiApiKey: geminiApiKey.trim(),
+        })
+      : await fetchAnthropicAdvice({
+          fetchImpl,
+          profile,
+          competitions,
+        });
+
   if (!advice) {
     throw createServiceError("AI_EMPTY_RESULT", AI_ADVICE_FALLBACK_MESSAGE);
   }
