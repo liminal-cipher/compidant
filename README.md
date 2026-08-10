@@ -14,7 +14,7 @@ A conversational recommender for Korean AI competitions and hackathons.
 
 Compidant는 긴 필터 폼 대신 네 개의 질문을 순서대로 던지고, 답에 맞는 것만 남겨서 보여준다.
 
-## What it does
+## What It Does
 
 실행 모드를 고른 뒤 4단계 질문에 답하면 추천 목록이 나온다.
 
