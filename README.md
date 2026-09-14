@@ -1,6 +1,6 @@
 # Compidant
 
-A conversational recommender for Korean AI competitions and hackathons.
+> A conversational recommender for Korean AI competitions and hackathons.
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-build-646CFF?logo=vite&logoColor=white)
