@@ -4,7 +4,7 @@
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-build-646CFF?logo=vite&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
+![Licence](https://img.shields.io/badge/Licence-MIT-green)
 
 > **comp**etition + con**fidant** = **Compidant**
 
@@ -73,7 +73,7 @@ src/Compidant.jsx + src/components/   화면 렌더링
 | 입력 방식 | **대화형 4단계 질문** (필터 폼 대신) | 필터 폼은 조건 체계를 이해해야 채울 수 있다. 질문은 순서대로 답만 하면 된다 |
 | 랭킹 | **규칙 기반 점수** (LLM 랭킹 대신) | 왜 추천됐는지 설명할 수 있어야 하고, 수십 건 규모에서 학습 기반 랭킹은 과하다 |
 | 실행 모드 | **3개** (`basic` · `gemini` · `artifact`) | API 키가 없어도 첫 화면에서 막히지 않아야 한다. `basic`이 그 하한선이다 |
-| 키 보관 | **브라우저 localStorage** | 백엔드 없이 정적 배포하기 위해서다. 키가 서버로 가지 않는다 |
+| 키 보관 | **브라우저 `localStorage`** | 백엔드 없이 정적 배포하기 위해서다. 키가 서버로 가지 않는다 |
 | 스타일 | **인라인 스타일 객체** | 컴포넌트 4개 규모에서 CSS 빌드 체계를 얹을 이유가 없었다 |
 | 빌드 | **Vite** | 단일 파일에서 모듈 분리로 넘어가면서 번들러가 필요해졌다 |
 
@@ -95,7 +95,7 @@ npm run dev
 
 터미널에 표시되는 로컬 주소를 연다.
 
-`.env` 파일은 필요 없다. `gemini` 모드를 쓰려면 첫 화면에서 Gemini API 키를 입력하면 되고, 키는 브라우저 localStorage에만 저장된다. `basic` 모드는 키 없이 동작한다.
+`.env` 파일은 필요 없다. `gemini` 모드를 쓰려면 첫 화면에서 Gemini API 키를 입력하면 되고, 키는 브라우저 `localStorage`에만 저장된다. `basic` 모드는 키 없이 동작한다.
 
 ## Retrospective
 
@@ -107,6 +107,6 @@ npm run dev
 
 기능 개발 동결. 마지막 기능 변경은 2026-04-08이며, 이후에는 문서와 저장소 정리만 진행했다. 내장 데이터가 만료된 상태로 유지 중이며 추가 개발 계획은 없다.
 
-## License
+## Licence
 
 MIT

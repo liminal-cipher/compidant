@@ -854,7 +854,7 @@ export default function Compidant() {
                   marginLeft: 8,
                 }}
               >
-                {activeResultCount}개 진행중
+                {activeResultCount}개 진행 중
                 {expiredResultCount > 0 ? ` · ${expiredResultCount}개 마감` : ""}
               </span>
             </div>
